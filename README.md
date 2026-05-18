@@ -71,10 +71,21 @@ limits on full 500-question runs.
 
 ## Dataset
 
-1. Get LongMemEval-S from <https://github.com/xiaowu0162/LongMemEval>.
-2. Place the JSON in `data/longmemeval_s.json`.
+LongMemEval-S is distributed via Hugging Face. Download the **cleaned**
+release (September 2025) directly into `data/`:
 
-`data/` is gitignored — the dataset is never committed.
+```bash
+wget https://huggingface.co/datasets/xiaowu0162/longmemeval-cleaned/resolve/main/longmemeval_s_cleaned.json -P data/
+```
+
+On Windows PowerShell:
+
+```powershell
+Invoke-WebRequest -Uri "https://huggingface.co/datasets/xiaowu0162/longmemeval-cleaned/resolve/main/longmemeval_s_cleaned.json" -OutFile "data\longmemeval_s_cleaned.json"
+```
+
+`data/` is gitignored — the dataset is never committed. The harness also
+accepts the older filenames `longmemeval_s.json` and `longmemeval.json`.
 
 ## Pre-registration (required before any scoring run)
 
