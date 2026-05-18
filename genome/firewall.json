@@ -1,0 +1,10 @@
+{
+  "mode": "block",
+  "forbidden_globs": [
+    "RUN_LOG.md",
+    "archive/**",
+    "old/**",
+    "node_modules/**",
+    ".git/**"
+  ]
+}
