@@ -1,60 +1,117 @@
-# GENOME — Project Genome System
+# GENOME-LM — Research Artifact
 
-Turns a repository into a queryable project brain. Instead of an agent reading
-files all over the repo, it gets one compiled, task-scoped **Context Capsule**
-built from curated knowledge.
+A minimal, reproducible test rig for **one** falsifiable hypothesis on the
+[LongMemEval](https://github.com/xiaowu0162/LongMemEval) memory benchmark:
 
-**Four pillars**
+> Does an explicit knowledge-lifecycle layer (supersession + staleness) improve
+> accuracy on knowledge-update tasks in agent memory — at equal or lower token
+> cost — compared to flat top-k retrieval?
 
-1. **Genome** — knowledge split into addressable *atoms* + a typed *synapse* graph.
-2. **Context Compiler** — builds a minimal capsule per task via graph traversal
-   (not blind keyword-RAG).
-3. **Firewall** — a real Claude Code PreToolUse hook that hard-blocks forbidden
-   reads.
-4. **Reflex + Review** — agents propose new knowledge into an inbox; only a
-   human accepts it into the genome. Full provenance, no drift.
+A single switch `--lifecycle {on,off}` flips between the two arms. **Extraction
+runs identically in both arms**, so the LLM cost of extraction is *not* a
+confounder. Only the lifecycle layer differs.
 
-Zero dependencies. Pure ESM. Node ≥ 18. Fully offline.
+Python ≥ 3.11. One required external dependency: the official Anthropic Python
+SDK. Offline except for LLM API calls.
 
-## Quickstart
+## Layout
 
-```bash
-node .genome/genome.mjs init                                  # one-time bootstrap
-node .genome/genome.mjs lint                                  # validate the genome
-node .genome/genome.mjs brief "Fix the dashboard auth bug" --budget 3500
-# the agent now works from .context/current.capsule.md
-node .genome/genome.mjs reflex                                # queue suggestions
-node .genome/genome.mjs review                                # list pending
-node .genome/genome.mjs review --accept prop.xxxxx.001        # ratify
+```
+.
+├── genome_lm/
+│   ├── config.py       # defaults: model, seed, paths, token caps
+│   ├── memory.py       # Atom dataclass + in-memory store
+│   ├── extract.py      # LLM extraction (identical in both arms)
+│   ├── lifecycle.py    # THE ABLATION: apply_lifecycle()
+│   └── retrieve.py     # self-implemented BM25
+├── harness/
+│   ├── run_longmemeval.py   # the experiment runner
+│   ├── judge.py             # LLM-as-judge (prompt loaded from EXPERIMENT.md)
+│   └── report.py            # comparison tables, no smoothing
+├── tests/test_lifecycle.py  # synthetic ablation test
+├── data/               # LongMemEval JSON goes here (gitignored)
+├── results/            # run outputs (gitignored)
+├── EXPERIMENT.md       # pre-registration template — fill in BEFORE scoring
+├── requirements.txt
+└── LICENSE
 ```
 
-## Commands
+## Setup
 
-| Command | What it does |
-|---|---|
-| `init` | Bootstrap `genome/`, `.genome/`, `.context/`, `.claude/` (idempotent). |
-| `lint` | Validate `atoms.jsonl` and `synapses.jsonl`; exit 1 on errors. |
-| `intent "<task>"` | Classify a task → `{intent, area, risk, needed_types}`. |
-| `brief "<task>" [--budget N] [--intent I] [--depth D]` | Compile `.context/current.capsule.md`. |
-| `receipt --task "<t>" --used id1,id2 --files f1,f2` | Append a run receipt. |
-| `reflex` | Convert `.genome/inbox.json` into pending proposals. |
-| `review` / `--accept <id>` / `--reject <id>` | Human gate for new knowledge. |
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+export ANTHROPIC_API_KEY=sk-...
+```
 
-## Why it works
+## Dataset
 
-- **Graph beats keyword search.** The compiler walks typed synapses to surface
-  knowledge that's connected, not just word-matched — the key gap RAG misses.
-- **Real firewall.** The PreToolUse hook blocks forbidden reads at the tool
-  layer; it isn't a polite request.
-- **No drift.** The knowledge base only changes through `review`. `history.jsonl`
-  is an append-only provenance log — every truth is traceable.
+1. Get LongMemEval-S from <https://github.com/xiaowu0162/LongMemEval>.
+2. Place the JSON in `data/longmemeval_s.json`.
+
+`data/` is gitignored — the dataset is never committed.
+
+## Pre-registration (required before any scoring run)
+
+Fill in `EXPERIMENT.md`:
+- Replace every `<<PLACEHOLDER>>`: minimum delta in pp, minimum sample size per
+  category per arm, minimum number of seeds, dataset commit SHA.
+- Confirm the judge prompt.
+- Check the `[ ]` box on the Status line.
+- Commit the file.
+
+The harness loads the judge prompt from `EXPERIMENT.md` at runtime, so locking
+it in via commit means it cannot drift during a study.
+
+## Example runs
+
+```bash
+# small smoke runs (5 questions each)
+python -m harness.run_longmemeval --lifecycle off --limit 5
+python -m harness.run_longmemeval --lifecycle on  --limit 5
+
+# compare two result files
+python -m harness.report results/run-off-*.json results/run-on-*.json
+```
+
+A single `--limit 5` run on Sonnet 4.6 costs a few cents. A full 500-question
+run × 2 arms × extraction-per-turn is hundreds of LLM calls per question;
+budget accordingly before you start.
+
+## Tests
+
+```bash
+python -m unittest discover -s tests -v
+```
+
+## Reproducing
+
+Each results file under `results/` records, automatically:
+- full config (lifecycle, k, model, judge model, seed, limit),
+- model id,
+- dataset SHA-256 hash,
+- seed,
+- UTC timestamp,
+- lifecycle mode.
+
+To reproduce a run, use the same flags on the same dataset hash. Different
+hash → different dataset, results are not comparable.
+
+## Integrity rules (not negotiable)
+
+1. No scoring runs before `EXPERIMENT.md` is filled out and committed.
+2. No tuning against test answers.
+3. Every run is kept, including failures and negative results.
+4. Seeds, model ids, dataset hashes are recorded automatically.
+
+A clean negative result ("the lifecycle layer does not help on these
+categories") is a real result — it is reported, not discarded.
 
 ## License
 
 [**PolyForm Noncommercial 1.0.0**](LICENSE) — free for personal, research,
 hobby, educational, charitable, and government use.
 
-**Commercial use requires a paid license.** If you want to use GENOME inside a
-for-profit company, in a paid product or service, or as part of any
-revenue-generating activity, see the "Commercial Licensing" section at the
-bottom of [LICENSE](LICENSE).
+**Commercial use requires a paid license.** See the "Commercial Licensing"
+section at the bottom of [LICENSE](LICENSE).
