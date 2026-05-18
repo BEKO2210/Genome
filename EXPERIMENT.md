@@ -59,9 +59,9 @@ Candidate answer:
 
 - **Dataset:** LongMemEval-S
 - **Quelle:** <https://github.com/xiaowu0162/LongMemEval>
-- **Commit-SHA des Datensatzes:** <<COMMIT-SHA EINTRAGEN>>
-- **Datei:** `data/longmemeval_s.json`
-- **Hash (SHA-256):** wird automatisch in jedes results-JSON geschrieben.
+- **Commit-SHA des Datensatzes:** `98d7416c24c778c2fee6e6f3006e7a073259d48f` (HF dataset `xiaowu0162/longmemeval-cleaned`, main @ 2025-09-19)
+- **Datei:** `data/longmemeval_s_cleaned.json`
+- **Hash (SHA-256):** `d6f21ea9d60a0d56f34a05b609c79c88a451d2ae03597821ea3d5a9678c3a442` (zusätzlich automatisch in jedes results-JSON geschrieben)
 
 # Status
 
