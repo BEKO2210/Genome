@@ -21,6 +21,7 @@ from genome_lm.config import (
     DEFAULT_SEED,
     RESULTS_DIR,
 )
+from genome_lm.clients import make_client
 from genome_lm.extract import extract_atoms
 from genome_lm.lifecycle import apply_lifecycle
 from genome_lm.memory import Atom, Memory
@@ -166,17 +167,13 @@ def _ingest_sessions(
     return {"ingest_turns": turn_index}
 
 
-def _make_client(api_key: str):
+def _build_client(backend: str):
+    api_key = os.environ.get(ANTHROPIC_API_KEY_ENV)
     try:
-        from anthropic import Anthropic  # type: ignore
-    except ImportError:
-        print(
-            "error: the anthropic SDK is not installed. "
-            "Run: pip install -r requirements.txt",
-            file=sys.stderr,
-        )
+        return make_client(backend, api_key)
+    except Exception as e:
+        print(f"error: {e}", file=sys.stderr)
         sys.exit(2)
-    return Anthropic(api_key=api_key)
 
 
 def _answer_question(client, model: str, question: str, retrieved: list[Atom]) -> tuple[str, int]:
@@ -200,15 +197,6 @@ def _answer_question(client, model: str, question: str, retrieved: list[Atom]) -
 
 
 def run(args: argparse.Namespace) -> Path:
-    api_key = os.environ.get(ANTHROPIC_API_KEY_ENV)
-    if not api_key:
-        print(
-            f"error: env var {ANTHROPIC_API_KEY_ENV} is not set.\n"
-            "  export ANTHROPIC_API_KEY=sk-...",
-            file=sys.stderr,
-        )
-        sys.exit(2)
-
     data_dir = Path(args.data_dir).resolve()
     dataset_path = _find_dataset(data_dir)
     if not dataset_path:
@@ -234,7 +222,7 @@ def run(args: argparse.Namespace) -> Path:
         sys.exit(2)
 
     items = dataset[: args.limit] if args.limit and args.limit > 0 else dataset
-    client = _make_client(api_key)
+    client = _build_client(args.backend)
 
     RESULTS_DIR.mkdir(exist_ok=True, parents=True)
     if args.out:
@@ -251,6 +239,7 @@ def run(args: argparse.Namespace) -> Path:
             "limit": args.limit,
             "model": args.model,
             "judge_model": args.judge_model,
+            "backend": args.backend,
             "seed": args.seed,
             "data_dir": str(data_dir),
             "dataset_file": dataset_path.name,
@@ -370,6 +359,14 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument(
         "--out", default=None,
         help="Output JSON path (default: results/run-<mode>-<ts>.json).",
+    )
+    p.add_argument(
+        "--backend", choices=["api", "claude-code"], default="api",
+        help=(
+            "LLM backend. 'api' = official Anthropic SDK (needs "
+            "ANTHROPIC_API_KEY). 'claude-code' = local `claude` CLI "
+            "(uses your Claude.ai subscription). Default: api."
+        ),
     )
     return p
 
