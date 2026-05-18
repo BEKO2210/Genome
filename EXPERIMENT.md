@@ -65,7 +65,7 @@ Candidate answer:
 
 # Status
 
-- [ ] **pre-registriert und committet** — dieser Haken MUSS gesetzt und das
+- [✔️] **pre-registriert und committet** — dieser Haken MUSS gesetzt und das
   ausgefüllte File committet sein, bevor der erste Wertungs-Run startet.
 
 > **Wichtig.** Iterations-Runs mit `--limit 5` zum Debuggen sind in Ordnung;
