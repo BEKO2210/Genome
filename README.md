@@ -42,8 +42,32 @@ SDK. Offline except for LLM API calls.
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
-export ANTHROPIC_API_KEY=sk-...
 ```
+
+Then pick one backend:
+
+### Backend A — Anthropic API (pay-per-token)
+
+```bash
+export ANTHROPIC_API_KEY=sk-ant-...
+```
+
+Use `--backend api` (default) when running the harness. Billed via
+console.anthropic.com.
+
+### Backend B — Claude Code CLI (uses your Claude.ai subscription)
+
+Install [Claude Code](https://docs.anthropic.com/en/docs/claude-code) once:
+
+```bash
+npm install -g @anthropic-ai/claude-code
+claude login
+```
+
+Then use `--backend claude-code` when running the harness. No API key needed —
+calls count against your Claude.ai subscription quota. Each LLM call spawns a
+subprocess, so it is slower than the SDK; great for smoke runs, may hit rate
+limits on full 500-question runs.
 
 ## Dataset
 
@@ -67,9 +91,9 @@ it in via commit means it cannot drift during a study.
 ## Example runs
 
 ```bash
-# small smoke runs (5 questions each)
-python -m harness.run_longmemeval --lifecycle off --limit 5
-python -m harness.run_longmemeval --lifecycle on  --limit 5
+# small smoke runs (5 questions each) — pick a backend with --backend
+python -m harness.run_longmemeval --lifecycle off --limit 5 --backend claude-code
+python -m harness.run_longmemeval --lifecycle on  --limit 5 --backend claude-code
 
 # compare two result files
 python -m harness.report results/run-off-*.json results/run-on-*.json
