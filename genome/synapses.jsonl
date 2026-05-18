@@ -1,7 +1,0 @@
-{"from":"rule.no-backend.001","to":"decision.local-auth.001","type":"constrains"}
-{"from":"rule.no-secrets.001","to":"decision.local-auth.001","type":"constrains"}
-{"from":"decision.local-auth.001","to":"plan.ext-auth.001","type":"supersedes"}
-{"from":"decision.local-auth.001","to":"test.auth-gate.001","type":"tested_by"}
-{"from":"bug.protocol-mismatch.001","to":"fact.gateway-url.001","type":"relates_to"}
-{"from":"rule.no-backend.001","to":"cmd.deploy.001","type":"constrains"}
-{"from":"bug.protocol-mismatch.001","to":"test.auth-gate.001","type":"relates_to"}
