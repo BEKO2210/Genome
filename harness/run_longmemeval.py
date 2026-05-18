@@ -29,6 +29,7 @@ from genome_lm.retrieve import retrieve
 from harness.judge import judge_answer, load_judge_prompt
 
 DATASET_FILENAMES: list[str] = [
+    "longmemeval_s_cleaned.json",
     "longmemeval_s.json",
     "longmemeval-s.json",
     "longmemeval.json",
@@ -49,9 +50,11 @@ def _find_dataset(data_dir: Path) -> Optional[Path]:
 def _dataset_help_msg(data_dir: Path) -> str:
     return (
         f"\nNo LongMemEval dataset found in {data_dir}/.\n"
-        "Download LongMemEval-S from the official repo:\n"
-        "  https://github.com/xiaowu0162/LongMemEval\n"
-        f"and place the JSON (typically longmemeval_s.json) inside {data_dir}/.\n"
+        "Download the cleaned LongMemEval-S file:\n"
+        "  https://huggingface.co/datasets/xiaowu0162/longmemeval-cleaned"
+        "/resolve/main/longmemeval_s_cleaned.json\n"
+        f"and place it inside {data_dir}/.\n"
+        "(The harness also accepts longmemeval_s.json or longmemeval.json.)\n"
     )
 
 
