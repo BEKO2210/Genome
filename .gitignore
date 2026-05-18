@@ -16,10 +16,13 @@ ENV/
 .idea/
 *.swp
 
-# benchmark dataset — must be downloaded separately
-data/
+# benchmark dataset — must be downloaded separately. The directory itself
+# is tracked (.gitkeep) so it exists after clone; only its contents are
+# ignored.
+data/*
+!data/.gitkeep
 
-# experiment outputs — append-only character; only the .gitkeep below is tracked
+# experiment outputs — append-only character; only the .gitkeep is tracked
 results/*.json
 results/*.jsonl
 
