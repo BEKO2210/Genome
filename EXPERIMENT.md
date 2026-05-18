@@ -8,7 +8,7 @@ gleichem oder geringerem Token-Verbrauch — gegenüber flachem top-k-Retrieval?
 
 **H1 (Alternativhypothese):** Auf den Knowledge-Update- und Temporal-Kategorien
 von LongMemEval-S erreicht GENOME-LM mit `--lifecycle on` eine um mindestens
-**<<MINDEST-DELTA IN PP>>** Prozentpunkte höhere Accuracy als derselbe Code mit
+**5** Prozentpunkte höhere Accuracy als derselbe Code mit
 `--lifecycle off`, **ohne** die Tokens pro Frage zu erhöhen (Δtokens ≤ 0).
 
 **H0 (Nullhypothese):** Kein Unterschied über das Rauschen hinaus.
@@ -20,10 +20,10 @@ von LongMemEval-S erreicht GENOME-LM mit `--lifecycle on` eine um mindestens
 - **Sekundärmetrik:** mittlere Tokens pro Frage (Prompt + Completion der
   Antwortphase).
 - **Voraussetzungen für eine gültige Wertung:**
-  - mindestens **<<MINIMALE STICHPROBE PRO KATEGORIE PRO ARM>>** Fragen je
+  - mindestens **30** Fragen je
     relevanter Kategorie pro Arm,
-  - mindestens **<<MINIMUM SEEDS>>** Seeds; berichtet wird Median ± Spannweite.
-- **H1 gilt bestätigt**, wenn der Median Δaccuracy **≥ <<MINDEST-DELTA IN PP>>**
+  - mindestens **3** Seeds; berichtet wird Median ± Spannweite.
+- **H1 gilt bestätigt**, wenn der Median Δaccuracy **≥ 5**
   Prozentpunkte über *beiden* relevanten Kategorien beträgt **UND** der
   Tokens-Mehrverbrauch ≤ 0 ist.
 - **H1 gilt widerlegt**, wenn das Konfidenzband um Δaccuracy bei 0 oder
